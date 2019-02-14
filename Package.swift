@@ -5,6 +5,11 @@ import PackageDescription
 
 let package = Package(
     name: "templar",
+    products: [
+        .executable(name: "templar", targets: ["templar"]),
+        .library(name: "TemplarPluginAPIv1", targets: ["TemplarPluginAPIv1"]),
+        .library(name: "TemplarCore", targets: ["TemplarCore"])
+    ],
     dependencies: [
         .package(url: "https://github.com/tuist/xcodeproj.git", .upToNextMajor(from: "6.5.0")),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "1.0.1")),
@@ -16,7 +21,11 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "templar",
-            dependencies: ["xcodeproj", "Yams", "SwiftCLI", "Files"]),
+            dependencies: ["xcodeproj", "TemplarCore", "SwiftCLI"]),
+        .target(name: "TemplarCore",
+                dependencies: ["Yams", "Files"]),
+        .target(name: "TemplarPluginAPIv1",
+                dependencies: ["TemplarCore"]),
         .testTarget(
             name: "templarTests",
             dependencies: ["templar"]),
