@@ -1,0 +1,9 @@
+kind:
+  xcodeproj:
+    name: templar
+    targets:
+    - templar
+    templates:
+    - kek
+version: 1.0.0
+templateFolder: .templates

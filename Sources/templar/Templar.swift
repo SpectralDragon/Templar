@@ -11,13 +11,13 @@ struct Templar: Codable {
     
     struct XcodeProj: Codable {
         let name: String
-        let companyName: String
-        var targets: [String]
-        var templates: [String]
+        let companyName: String?
+        var targets: Set<String>
+        var templates: Set<String>
     }
     
     struct Custom: Codable {
-        var templates: [String]
+        var templates: Set<String>
     }
     
     enum Kind: Codable {
@@ -25,8 +25,8 @@ struct Templar: Codable {
         case custom(Custom)
     }
     
-    let kind: Kind
-    let version: String
+    var kind: Kind
+    var version: String
     let templateFolder: String
 }
 

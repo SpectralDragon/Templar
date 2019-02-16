@@ -14,7 +14,7 @@ class TemplarTool {
     private let arguments: [String]
     
     init(arguments: [String]) {
-        self.commandLineTool = CLI(name: TemplarInfo.name, version: TemplarInfo.version, description: "Templar - generate your templates", commands: [InitCommand(), GenerateTemplate()])
+        self.commandLineTool = CLI(name: TemplarInfo.name, version: TemplarInfo.version, description: "Templar - generate your templates", commands: [InitCommand(), GenerateTemplate(), TempalateCommand()])
         self.arguments = arguments
     }
     

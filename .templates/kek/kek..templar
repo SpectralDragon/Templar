@@ -1,0 +1,10 @@
+version: 1.0.0
+summary: ENTER_YOUR_SUMMORY
+author: ENTER_YOUR
+root: Sources/templar/TEST
+files:
+- name: View/ViewController.swift
+  path: View/ViewController.swift.templar
+replaceRules:
+- predicate: __NAME__
+  question: 'Name of your module:'
