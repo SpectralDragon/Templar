@@ -1,6 +1,4 @@
-import Foundation
-
-enum TemplarInfo {
+enum __NAME__=upperCamelCase=Info {
     static let name = "templar"
     static let version = "1.0.0"
     static let defaultFolder = ".templates"
@@ -9,5 +7,5 @@ enum TemplarInfo {
 }
 
 
-let tool = TemplarTool(arguments: Array(CommandLine.arguments.dropFirst()))
+let tool = __NAME__=upperCamelCase=Tool(arguments: Array(CommandLine.arguments.dropFirst()))
 tool.run()

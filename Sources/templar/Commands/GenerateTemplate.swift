@@ -45,79 +45,63 @@ class GenerateTemplate: Command {
         
         let templateInfo = try decoder.decode(Template.self, from: try file.readAsString())
         
-//        let xcFile = try Folder.current.file(named: xcodeproj.name)
-//        let project = try XcodeProj(pathString: xcFile.path)
+        let xcFile = try Folder.current.file(named: xcodeproj.name)
+        let project = try XcodeProj(pathString: xcFile.path)
         
         guard !templateInfo.root.isEmpty else {
             throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Path to root in template \(templateName.value) is empty".red])
         }
         
-//        let answers = templateInfo.replaceRules.map {
-//            return Input.readLineWhileNotGetAnswer(prompt: $0.question, error: "Answer can't be empty", output: stderr)
-//        }
-//        
-        let pattern = templateInfo.replaceRules.reduce("", { "\($0)|\($1.pattern)"})
-        
-        for file in templateInfo.files {
-            let templateFile = try templateFolder.file(atPath: file.path)
-            let rawTemplate = try templateFile.readAsString()
-            
-            
-            
-            let exp = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
-            let matches = exp.matches(in: rawTemplate, options: [], range: NSRange(0...rawTemplate.count))
-            
-            print(matches)
-//            let templateFile = try templatesFolder.file(atPath: file.pathToTemplate)
-//            var templateData = try templateFile.readAsString()
-//            templateData
-            
-            // TODO: Generation
-            
-//            try project.pbxproj.write(pathString: file.pathToTemplate, override: true)
+        let itemsToReplace = templateInfo.replaceRules.map { rule -> (answer: String, pattern: String) in
+            let answer = Input.readLineWhileNotGetAnswer(prompt: rule.question, error: "Answer can't be empty", output: stderr)
+            return (answer, rule.pattern)
         }
         
+        let allModifiers = Template.Modifier.allCases
+        
+        for file in templateInfo.files {
+            let templateFile = try templateFolder.file(atPath: file.name)
+            var rawTemplate = try templateFile.readAsString()
+         
+            for item in itemsToReplace {
+                let expression = try NSRegularExpression(pattern: "\(item.pattern)(\(allModifiers.pattern))", options: .caseInsensitive)
+                
+                while let range = expression.firstMatch(in: rawTemplate, options: [], range: NSRange(0..<rawTemplate.count)).flatMap( { Range($0.range, in: rawTemplate) }) {
+                    let currentMatchString = String(rawTemplate[range])
+                    var textToReplace = item.answer
+                    
+                    if let modifier = allModifiers.first(where: { currentMatchString.hasSuffix($0.rawValue) }) {
+                        switch modifier {
+                        case .lowercase:
+                            textToReplace = textToReplace.lowercased()
+                        case .lowerCamelCase:
+                            textToReplace = textToReplace.lowercased() // TODO: To do
+                        case .uppercase:
+                            textToReplace = textToReplace.uppercased()
+                        case .upperCamelCase:
+                            textToReplace = textToReplace.upperCamelCased() // TODO: To do
+                        case .snake_case:
+                            textToReplace = textToReplace.snakecased()
+                        }
+                    }
+                    
+                    rawTemplate.replaceSubrange(range, with: textToReplace)
+                }
+            }
+            
+//            try Folder.current.subfolder(atPath: templateInfo.root).createFile(named: <#T##String#>, contents: <#T##String#>)
+            
+            let path = templateInfo.root + file.path
+            try project.pbxproj.write(pathString: path, override: true)
+        }
+        
+        stdout <<< "Did finish generate 🛠".green
     }
 }
 
 extension Array where Element == Template.Modifier {
-    var string: String {
-        return self.reduce("", { "\($0)|\($1.rawValue)"})
-    }
-}
-
-struct Template: Codable {
-    
-    enum Modifier: String, CaseIterable {
-        case lowercase
-        case lowerCamelCase
-        case uppercase
-        case upperCamelCase
-        case snake_case
-    }
-    
-    struct File: Codable {
-        let name: String
-        let path: String
-    }
-    
-    struct Rule: Codable {
-        let pattern: String
-        let question: String
-    }
-    
-    let version: String
-    
-    let summary: String?
-    let author: String?
-    
-    let root: String
-    let files: [File]
-    
-    let replaceRules: [Rule]
-    
-    static func makeFullName(from name: String) -> String {
-        return "\(name).\(TemplarInfo.templateFileExtension)"
+    var pattern: String {
+        return self.reduce("", { "\($0)=\($1.rawValue)|"})
     }
 }
 
@@ -132,4 +116,70 @@ enum TemplarError: LocalizedError {
         }
     }
     
+}
+
+
+fileprivate extension String {
+    
+    func lowerCamelCase() -> String {
+        return self
+    }
+    
+    func upperCamelCased() -> String {
+        
+        
+        return self
+    }
+    
+    func snakecased() -> String {
+        let stringKey = self
+        
+        guard !stringKey.isEmpty else { return stringKey }
+        
+        var words : [Range<String.Index>] = []
+        // The general idea of this algorithm is to split words on transition from lower to upper case, then on transition of >1 upper case characters to lowercase
+        //
+        // myProperty -> my_property
+        // myURLProperty -> my_url_property
+        //
+        // We assume, per Swift naming conventions, that the first character of the key is lowercase.
+        var wordStart = stringKey.startIndex
+        var searchRange = stringKey.index(after: wordStart)..<stringKey.endIndex
+        
+        // Find next uppercase character
+        while let upperCaseRange = stringKey.rangeOfCharacter(from: CharacterSet.uppercaseLetters, options: [], range: searchRange) {
+            let untilUpperCase = wordStart..<upperCaseRange.lowerBound
+            words.append(untilUpperCase)
+            
+            // Find next lowercase character
+            searchRange = upperCaseRange.lowerBound..<searchRange.upperBound
+            guard let lowerCaseRange = stringKey.rangeOfCharacter(from: CharacterSet.lowercaseLetters, options: [], range: searchRange) else {
+                // There are no more lower case letters. Just end here.
+                wordStart = searchRange.lowerBound
+                break
+            }
+            
+            // Is the next lowercase letter more than 1 after the uppercase? If so, we encountered a group of uppercase letters that we should treat as its own word
+            let nextCharacterAfterCapital = stringKey.index(after: upperCaseRange.lowerBound)
+            if lowerCaseRange.lowerBound == nextCharacterAfterCapital {
+                // The next character after capital is a lower case character and therefore not a word boundary.
+                // Continue searching for the next upper case for the boundary.
+                wordStart = upperCaseRange.lowerBound
+            } else {
+                // There was a range of >1 capital letters. Turn those into a word, stopping at the capital before the lower case character.
+                let beforeLowerIndex = stringKey.index(before: lowerCaseRange.lowerBound)
+                words.append(upperCaseRange.lowerBound..<beforeLowerIndex)
+                
+                // Next word starts at the capital before the lowercase we just found
+                wordStart = beforeLowerIndex
+            }
+            searchRange = lowerCaseRange.upperBound..<searchRange.upperBound
+        }
+        words.append(wordStart..<searchRange.upperBound)
+        let result = words.map({ (range) in
+            return stringKey[range].lowercased()
+        }).joined(separator: "_")
+        return result
+    }
+
 }

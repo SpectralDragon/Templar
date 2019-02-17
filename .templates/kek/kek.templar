@@ -6,5 +6,5 @@ files:
 - name: View/ViewController.swift
   path: View/ViewController.swift.templar
 replaceRules:
-- predicate: __NAME__
+- pattern: __NAME__
   question: 'Name of your module:'
