@@ -11,9 +11,9 @@ struct Template: Codable {
     
     enum Modifier: String, CaseIterable {
         case lowercase
-        case lowerCamelCase
+        case firstLowercased
         case uppercase
-        case upperCamelCase
+        case firstUppercased
         case snake_case
     }
     

@@ -74,12 +74,12 @@ class GenerateTemplate: Command {
                         switch modifier {
                         case .lowercase:
                             textToReplace = textToReplace.lowercased()
-                        case .lowerCamelCase:
-                            textToReplace = textToReplace.lowercased() // TODO: To do
+                        case .firstLowercased:
+                            textToReplace = textToReplace.firstLowercased()
                         case .uppercase:
                             textToReplace = textToReplace.uppercased()
-                        case .upperCamelCase:
-                            textToReplace = textToReplace.upperCamelCased() // TODO: To do
+                        case .firstUppercased:
+                            textToReplace = textToReplace.firstUppercased()
                         case .snake_case:
                             textToReplace = textToReplace.snakecased()
                         }
@@ -99,36 +99,23 @@ class GenerateTemplate: Command {
     }
 }
 
-extension Array where Element == Template.Modifier {
+fileprivate extension Array where Element == Template.Modifier {
     var pattern: String {
         return self.reduce("", { "\($0)=\($1.rawValue)|"})
     }
 }
 
-enum TemplarError: LocalizedError {
-    
-    case configNotFound
-    
-    var errorDescription: String? {
-        switch self {
-        case .configNotFound:
-            return "Templar config not found. Using \"templar init\" to initialize config"
-        }
-    }
-    
-}
-
 
 fileprivate extension String {
     
-    func lowerCamelCase() -> String {
-        return self
+    func firstLowercased() -> String {
+        guard let first = first else { return self }
+        return String(first).lowercased() + dropFirst()
     }
     
-    func upperCamelCased() -> String {
-        
-        
-        return self
+    func firstUppercased() -> String {
+        guard let first = first else { return self }
+        return String(first).capitalized + dropFirst()
     }
     
     func snakecased() -> String {
