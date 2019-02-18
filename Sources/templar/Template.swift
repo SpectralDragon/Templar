@@ -18,8 +18,8 @@ struct Template: Codable {
     }
     
     struct File: Codable {
-        let name: String
         let path: String
+        let templatePath: String
     }
     
     struct Rule: Codable {

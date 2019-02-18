@@ -1,6 +1,6 @@
 kind:
   xcodeproj:
-    name: templar
+    name: templar.xcodeproj
     targets:
     - templar
     templates:

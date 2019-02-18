@@ -10,6 +10,7 @@ import Foundation
 import Yams
 import Files
 import xcodeproj
+import PathKit
 
 class GenerateTemplate: Command {
     
@@ -42,10 +43,9 @@ class GenerateTemplate: Command {
         
         let templateFolder = try Folder.current.subfolder(named: templar.templateFolder).subfolder(named: selectedTemplate)
         let file = try templateFolder.file(named: Template.makeFullName(from: selectedTemplate))
-        
         let templateInfo = try decoder.decode(Template.self, from: try file.readAsString())
         
-        let xcFile = try Folder.current.file(named: xcodeproj.name)
+        let xcFile = try Folder.current.subfolder(named: xcodeproj.name)
         let project = try XcodeProj(pathString: xcFile.path)
         
         guard !templateInfo.root.isEmpty else {
@@ -60,7 +60,7 @@ class GenerateTemplate: Command {
         let allModifiers = Template.Modifier.allCases
         
         for file in templateInfo.files {
-            let templateFile = try templateFolder.file(atPath: file.name)
+            let templateFile = try templateFolder.file(atPath: file.templatePath)
             var rawTemplate = try templateFile.readAsString()
          
             for item in itemsToReplace {
@@ -89,11 +89,44 @@ class GenerateTemplate: Command {
                 }
             }
             
-//            try Folder.current.subfolder(atPath: templateInfo.root).createFile(named: <#T##String#>, contents: <#T##String#>)
+            let filePath = Path(file.path)
+            let rootPath = Path(templateInfo.root)
+            let path = rootPath + filePath
+            let fullPath = Path(Folder.current.path) + path
             
-            let path = templateInfo.root + file.path
-            try project.pbxproj.write(pathString: path, override: true)
+            try fullPath.parent().mkpath()
+            try fullPath.write(rawTemplate)
+
+            try project.pbxproj.groups.forEach {
+                if templateInfo.root.contains($0.path ?? "") == true {
+                    print($0.path)
+                    print(try $0.fullPath(sourceRoot: Path(xcFile.path)))
+                }
+            }
+            
+            if let rootGroup = project.pbxproj.groups.first(where: { templateInfo.root.contains($0.path ?? "") == true }) {
+                print(rootGroup.path as Any)
+                
+                let createdGroups = try rootGroup.addGroup(named: filePath.parent().string)
+                
+                print(createdGroups)
+                if createdGroups.isEmpty {
+                    stderr <<< "Can't get groups by path \(Path(file.path).string) for root group \(rootGroup.path ?? "")".red
+                    continue
+                }
+                createdGroups.forEach {
+                    print($0.path as Any)
+                }
+                try createdGroups.last?.addFile(at: fullPath, sourceRoot: Path(xcFile.path))
+            } else {
+                stderr <<< "Can't found root group in xcodeproject by path \(templateInfo.root)".red
+                continue
+            }
+            
+            
         }
+        
+        try project.write(pathString: xcFile.path, override: true)
         
         stdout <<< "Did finish generate 🛠".green
     }

@@ -3,8 +3,8 @@ summary: ENTER_YOUR_SUMMORY
 author: ENTER_YOUR
 root: Sources/templar/TEST
 files:
-- name: View/ViewController.swift
-  path: View/ViewController.swift.templar
+- path: View/ViewController.swift
+  templatePath: View/ViewController.swift.templar
 replaceRules:
 - pattern: __NAME__
   question: 'Name of your module:'

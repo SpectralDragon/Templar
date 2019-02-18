@@ -25,9 +25,9 @@ struct Templar: Codable {
         case custom(Custom)
     }
     
-    var kind: Kind
     var version: String
     let templateFolder: String
+    var kind: Kind
 }
 
 extension Templar.Kind {

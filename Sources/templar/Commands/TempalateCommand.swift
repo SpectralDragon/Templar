@@ -44,7 +44,7 @@ class NewTemplateCommand: Command {
             summary: "ENTER_YOUR_SUMMORY",
             author: "ENTER_YOUR",
             root: rootModulePath,
-            files: [Template.File(name: "View/ViewController.swift", path: "View/ViewController.swift.templar")],
+            files: [Template.File(path: "View/ViewController.swift", templatePath: "View/ViewController.swift.templar")],
             replaceRules: [Template.Rule(pattern: "__NAME__", question: "Name of your module:")]
         )
         
@@ -65,19 +65,6 @@ class NewTemplateCommand: Command {
         
         let newTemplar = try YAMLEncoder().encode(templar)
         try Folder.current.createFile(named: TemplarInfo.configFileName, contents: newTemplar)
-    }
-}
-
-extension Input {
-    static func readLineWhileNotGetAnswer(prompt: String, error: String, output: WritableStream) -> String {
-        let answer = Input.readLine(prompt: prompt.green)
-        
-        guard !answer.isEmpty else {
-            output <<< error.red
-            return readLineWhileNotGetAnswer(prompt: prompt, error: error, output: output)
-        }
-        
-        return answer
     }
 }
 

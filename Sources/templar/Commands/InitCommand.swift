@@ -26,12 +26,12 @@ class InitCommand: Command {
             let xcodeProj = try self.createXcodeTemplate()
             templarKind = .xcodeproj(xcodeProj)
         } else {
-            throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "In progress"])
+            throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "In progress".red])
 //            let custom = Templar.Custom(templates: [])
 //            kind = .custom(custom)
         }
         
-        let templar = Templar(kind: templarKind, version: TemplarInfo.version, templateFolder: TemplarInfo.defaultFolder)
+        let templar = Templar(version: TemplarInfo.version, templateFolder: TemplarInfo.defaultFolder, kind: templarKind)
         let yamlData = try YAMLEncoder().encode(templar)
         
         stdout <<< "Create config file \(TemplarInfo.configFileName)".yellow
@@ -78,7 +78,7 @@ class InitCommand: Command {
         
         let companyName = Input.readLine(prompt: "What is your company name?".green)
         
-        let xcodeProj = Templar.XcodeProj(name: selectedProjectFile.nameExcludingExtension,
+        let xcodeProj = Templar.XcodeProj(name: selectedProjectFile.name,
                                           companyName: !companyName.isEmpty ? companyName : nil ,
                                           targets: usingTargets,
                                           templates: [])

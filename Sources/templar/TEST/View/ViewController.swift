@@ -1,4 +1,4 @@
-enum __NAME__=firstUppercasedInfo {
+enum KekInfo {
     static let name = "templar"
     static let version = "1.0.0"
     static let defaultFolder = ".templates"
@@ -7,5 +7,5 @@ enum __NAME__=firstUppercasedInfo {
 }
 
 
-let tool = __NAME__=firstLowercasedTool(arguments: Array(CommandLine.arguments.dropFirst()))
+let tool = kekTool(arguments: Array(CommandLine.arguments.dropFirst()))
 tool.run()
