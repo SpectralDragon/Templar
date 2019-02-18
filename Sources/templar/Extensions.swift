@@ -21,3 +21,13 @@ extension Input {
         return answer
     }
 }
+
+extension String {
+    static var empty = String()
+}
+
+extension Optional where Wrapped == String {
+    var orEmpty: String {
+        return self ?? ""
+    }
+}

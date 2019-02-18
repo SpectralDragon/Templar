@@ -64,6 +64,7 @@ class GenerateTemplate: Command {
             var rawTemplate = try templateFile.readAsString()
          
             for item in itemsToReplace {
+                // Regex pattern looks like YOURPATTERN(=lowercased|=snake_case|)
                 let expression = try NSRegularExpression(pattern: "\(item.pattern)(\(allModifiers.pattern))", options: .caseInsensitive)
                 
                 while let range = expression.firstMatch(in: rawTemplate, options: [], range: NSRange(0..<rawTemplate.count)).flatMap( { Range($0.range, in: rawTemplate) }) {
@@ -97,17 +98,13 @@ class GenerateTemplate: Command {
             try fullPath.parent().mkpath()
             try fullPath.write(rawTemplate)
 
-            try project.pbxproj.groups.forEach {
-                if templateInfo.root.contains($0.path ?? "") == true {
-                    print($0.path)
-                    print(try $0.fullPath(sourceRoot: Path(xcFile.path)))
-                }
-            }
-            
-            if let rootGroup = project.pbxproj.groups.first(where: { templateInfo.root.contains($0.path ?? "") == true }) {
+            if let rootGroup = project.pbxproj.groups.first(where: { templateInfo.root.hasPrefix($0.path ?? "") == true }) {
                 print(rootGroup.path as Any)
                 
-                let createdGroups = try rootGroup.addGroup(named: filePath.parent().string)
+                let pathToAddedGroup = Path(String(templateInfo.root.dropFirst(rootGroup.path.orEmpty.count))) + filePath.parent()
+                
+                
+                let createdGroups = try rootGroup.addGroup(named: pathToAddedGroup.string)
                 
                 print(createdGroups)
                 if createdGroups.isEmpty {
@@ -138,7 +135,6 @@ fileprivate extension Array where Element == Template.Modifier {
     }
 }
 
-
 fileprivate extension String {
     
     func firstLowercased() -> String {
@@ -151,55 +147,14 @@ fileprivate extension String {
         return String(first).capitalized + dropFirst()
     }
     
+    /// - seealso: https://gist.github.com/ivanbruel/e72d938f49db64d2f5df09fb9420c1e2
     func snakecased() -> String {
-        let stringKey = self
+        let pattern = "([a-z0-9])([A-Z])"
+        let regex = try? NSRegularExpression(pattern: pattern, options: [])
+        let replacingResult = regex?.stringByReplacingMatches(in: self, options: [],
+                                               range: NSRange(0..<self.count), withTemplate: "$1_$2")
         
-        guard !stringKey.isEmpty else { return stringKey }
-        
-        var words : [Range<String.Index>] = []
-        // The general idea of this algorithm is to split words on transition from lower to upper case, then on transition of >1 upper case characters to lowercase
-        //
-        // myProperty -> my_property
-        // myURLProperty -> my_url_property
-        //
-        // We assume, per Swift naming conventions, that the first character of the key is lowercase.
-        var wordStart = stringKey.startIndex
-        var searchRange = stringKey.index(after: wordStart)..<stringKey.endIndex
-        
-        // Find next uppercase character
-        while let upperCaseRange = stringKey.rangeOfCharacter(from: CharacterSet.uppercaseLetters, options: [], range: searchRange) {
-            let untilUpperCase = wordStart..<upperCaseRange.lowerBound
-            words.append(untilUpperCase)
-            
-            // Find next lowercase character
-            searchRange = upperCaseRange.lowerBound..<searchRange.upperBound
-            guard let lowerCaseRange = stringKey.rangeOfCharacter(from: CharacterSet.lowercaseLetters, options: [], range: searchRange) else {
-                // There are no more lower case letters. Just end here.
-                wordStart = searchRange.lowerBound
-                break
-            }
-            
-            // Is the next lowercase letter more than 1 after the uppercase? If so, we encountered a group of uppercase letters that we should treat as its own word
-            let nextCharacterAfterCapital = stringKey.index(after: upperCaseRange.lowerBound)
-            if lowerCaseRange.lowerBound == nextCharacterAfterCapital {
-                // The next character after capital is a lower case character and therefore not a word boundary.
-                // Continue searching for the next upper case for the boundary.
-                wordStart = upperCaseRange.lowerBound
-            } else {
-                // There was a range of >1 capital letters. Turn those into a word, stopping at the capital before the lower case character.
-                let beforeLowerIndex = stringKey.index(before: lowerCaseRange.lowerBound)
-                words.append(upperCaseRange.lowerBound..<beforeLowerIndex)
-                
-                // Next word starts at the capital before the lowercase we just found
-                wordStart = beforeLowerIndex
-            }
-            searchRange = lowerCaseRange.upperBound..<searchRange.upperBound
-        }
-        words.append(wordStart..<searchRange.upperBound)
-        let result = words.map({ (range) in
-            return stringKey[range].lowercased()
-        }).joined(separator: "_")
-        return result
+        return replacingResult?.lowercased() ?? self
     }
 
 }

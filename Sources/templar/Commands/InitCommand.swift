@@ -90,5 +90,4 @@ class InitCommand: Command {
         fatalError()
     }
     
-    
 }
