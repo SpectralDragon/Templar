@@ -89,17 +89,17 @@ Yup, Templar is supported scripts. Scripts will run after template generation an
 
 For creating scripts just use command: `templar template new [templateName] --use-scripts` or set manual `scripts:` parameter to your template.
 
-Example:
+Like example generate the new xcodeproj for your SPM project:
 
 ```yaml
 ...
 scripts:
-  - echo 'Scripts completed' 
+  - swift package generate-xcodeproj
 ```
 
 ### Installation
 
-Homebrew
+ Homebrew
 
 ```bash
 brew cask install templar
