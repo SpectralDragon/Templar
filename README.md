@@ -16,15 +16,15 @@ Templar create YAML config `.templar` and `.templates` directory.
 Example:
 
 ```yaml
-kind: // Information about your project
+kind: # Information about your project
 xcodeproj:
-name: templar.xcodeproj // your project file name
-targets: // list of targets for generation
+name: templar.xcodeproj # your project file name
+targets: # list of targets for generation
 - templar
-templates: // list of templates name
+templates: # list of templates name
 - mvvm
-version: 1.0.0 // config version 
-templateFolder: .templates // path to templates directory
+version: 1.0.0 # config version 
+templateFolder: .templates # path to templates directory
 ```
 
 ##### 2) Templates
@@ -35,16 +35,16 @@ After install your templar, you are can use command `templar template new [templ
 The template directory contains `[templateName].templar` and looks like this:
 
 ```yaml
-version: 1.0.0 // template version. 
-summary: ENTER_YOUR_SUMMORY // Bit of information about your template and what it do.
-author: ENTER_YOUR // Authour name or links
-root: Sources/templar // Path to folder where templar will generate your templates.
-files: // Tempalte files
-- path: View/ViewController.swift // Path for place where file will contains after process
-templatePath: View/ViewController.swift.templar // Path to template
-replaceRules: // Keys for replacing
-- pattern: __NAME__ // Key for replace. You can use regexp here.
-question: 'Name of your module:' // Question will display in terminal and answer will use for replace pattern
+version: 1.0.0 # template version. 
+summary: ENTER_YOUR_SUMMORY # Bit of information about your template and what it do.
+author: ENTER_YOUR # Authour name or links
+root: Sources/templar # Path to folder where templar will generate your templates.
+files: # Tempalte files
+- path: View/ViewController.swift # Path for place where file will contains after process
+templatePath: View/ViewController.swift.templar # Path to template
+replaceRules: # Keys for replacing
+- pattern: __NAME__ # Key for replace. You can use regexp here.
+question: 'Name of your module:' # Question will display in terminal and answer will use for replace pattern
 ```
 
 ### How to write template?
@@ -53,7 +53,7 @@ The first you going to set pattern for replace. Like example it will `__NAME__`
 
 ```
 class __NAME__ViewController: UIViewController {
-/// Other code
+#/ Other code
 }
 ```
 
@@ -77,7 +77,7 @@ Example with modifiers:
 class __NAME__Presenter {
 
 func __NAME__=firstLowercased=ViewControllerDidLoad() {
-// Code
+# Code
 }
 
 }
