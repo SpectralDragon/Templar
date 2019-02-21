@@ -51,7 +51,7 @@ replaceRules: # Keys for replacing
 
 The first you going to set pattern for replace. Like example it will `__NAME__`
 
-```
+```swift
 class __NAME__ViewController: UIViewController {
   // Other code
 }
@@ -73,7 +73,7 @@ Pattern can be modified with next separated keys:
 
 Example with modifiers:
 
-```
+```swift
 class __NAME__Presenter {
 
 func __NAME__=firstLowercased=ViewControllerDidLoad() {
