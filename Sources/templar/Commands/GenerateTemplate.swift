@@ -64,7 +64,7 @@ class GenerateTemplate: Command {
             var rawTemplate = try templateFile.readAsString()
          
             for item in itemsToReplace {
-                // Regex pattern looks like YOURPATTERN(=lowercased|=snake_case|)
+                // Regex pattern looks like YOURPATTERN(=lowercased=|=snake_case=|)
                 let expression = try NSRegularExpression(pattern: "\(item.pattern)(\(allModifiers.pattern))", options: .caseInsensitive)
                 
                 while let range = expression.firstMatch(in: rawTemplate, options: [], range: NSRange(0..<rawTemplate.count)).flatMap( { Range($0.range, in: rawTemplate) }) {
@@ -151,7 +151,7 @@ class GenerateTemplate: Command {
 
 fileprivate extension Array where Element == Template.Modifier {
     var pattern: String {
-        return self.reduce("", { "\($0)=\($1.rawValue)|"})
+        return self.reduce("", { "\($0)=\($1.rawValue)=|"})
     }
 }
 
