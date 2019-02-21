@@ -9,6 +9,21 @@ import Foundation
 
 struct Template: Codable {
     
+    let version: String
+    
+    let summary: String?
+    let author: String?
+    
+    let root: String
+    let files: [File]
+    
+    let replaceRules: [Rule]
+    
+    let scripts: [String]?
+    
+}
+
+extension Template {
     enum Modifier: String, CaseIterable {
         case lowercase
         case firstLowercased
@@ -26,17 +41,9 @@ struct Template: Codable {
         let pattern: String
         let question: String
     }
-    
-    let version: String
-    
-    let summary: String?
-    let author: String?
-    
-    let root: String
-    let files: [File]
-    
-    let replaceRules: [Rule]
-    
+}
+
+extension Template {
     static func makeFullName(from name: String) -> String {
         return "\(name).\(TemplarInfo.templateFileExtension)"
     }

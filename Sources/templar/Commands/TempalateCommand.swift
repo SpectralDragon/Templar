@@ -26,6 +26,8 @@ class NewTemplateCommand: Command {
     
     let templateName = Parameter()
     
+    let needsUseScripts = Flag("--use-scripts", description: "Add scripts parameter to template.", defaultValue: false)
+    
     private let decoder = YAMLDecoder()
     
     func execute() throws {
@@ -39,13 +41,16 @@ class NewTemplateCommand: Command {
                                                              error: "Root path can't be empty",
                                                              output: stderr)
         
+        let scripts: [String]? = needsUseScripts.value ? [] : nil
+        
         let template = Template(
             version: "1.0.0",
             summary: "ENTER_YOUR_SUMMORY",
             author: "ENTER_YOUR",
             root: rootModulePath,
             files: [Template.File(path: "View/ViewController.swift", templatePath: "View/ViewController.swift.templar")],
-            replaceRules: [Template.Rule(pattern: "__NAME__", question: "Name of your module:")]
+            replaceRules: [Template.Rule(pattern: "__NAME__", question: "Name of your module:")],
+            scripts: scripts
         )
         
         let templateData = try YAMLEncoder().encode(template)

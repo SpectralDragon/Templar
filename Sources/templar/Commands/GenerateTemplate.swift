@@ -98,34 +98,54 @@ class GenerateTemplate: Command {
             try fullPath.parent().mkpath()
             try fullPath.write(rawTemplate)
 
-            if let rootGroup = project.pbxproj.groups.first(where: { templateInfo.root.hasPrefix($0.path ?? "") == true }) {
-                print(rootGroup.path as Any)
+            if let rootGroup = project.pbxproj.groups.first(where: { templateInfo.root.hasPrefix($0.path.orEmpty) }) {
                 
                 let pathToAddedGroup = Path(String(templateInfo.root.dropFirst(rootGroup.path.orEmpty.count))) + filePath.parent()
                 
-                
                 let createdGroups = try rootGroup.addGroup(named: pathToAddedGroup.string)
                 
-                print(createdGroups)
+                print("Created group".blue, createdGroups)
+                
                 if createdGroups.isEmpty {
                     stderr <<< "Can't get groups by path \(Path(file.path).string) for root group \(rootGroup.path ?? "")".red
                     continue
                 }
-                createdGroups.forEach {
-                    print($0.path as Any)
+                
+                if let lastGroupInChain = createdGroups.last {
+                    let file = PBXFileElement(sourceTree: .group, path: fullPath.string, name: fullPath.lastComponent, includeInIndex: true)
+                    let buildFile = PBXBuildFile(file: file)
+                    project.pbxproj.add(object: buildFile)
+                    try lastGroupInChain.addFile(at: fullPath, sourceTree: .group, sourceRoot: Path(xcFile.path).parent())
+                } else {
+                    throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create file by path \(fullPath.string)".red])
                 }
-                try createdGroups.last?.addFile(at: fullPath, sourceRoot: Path(xcFile.path))
             } else {
                 stderr <<< "Can't found root group in xcodeproject by path \(templateInfo.root)".red
                 continue
             }
-            
-            
         }
         
         try project.write(pathString: xcFile.path, override: true)
         
-        stdout <<< "Did finish generate 🛠".green
+        if let scripts = templateInfo.scripts {
+            stdout <<< "Begin executing scripts".yellow
+            
+            for script in scripts {
+                let arguments = script.split(separator: " ").map(String.init)
+                let process = Process.launchedProcess(launchPath: "/usr/bin/", arguments: arguments)
+                
+                if #available(macOS 10.13, *) {
+                    try process.run()
+                } else {
+                    process.launch()
+                }
+                
+            }
+            
+            stdout <<< "Did finish executing scripts".yellow
+        }
+        
+        stdout <<< "Did finish generate 🛠".green.bold
     }
 }
 
