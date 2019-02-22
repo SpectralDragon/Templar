@@ -81,8 +81,6 @@ class UpdateTemplateCommand: Command {
     let updateFilesFlag = Key<String>("--files", description: "Scan and update files to template")
     
     func execute() throws {
-//        if let key = updateFilesFlag.value {
-//
-//        }
+        throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "In progress".red])
     }
 }

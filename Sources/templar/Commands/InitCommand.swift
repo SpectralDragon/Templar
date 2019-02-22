@@ -23,12 +23,11 @@ class InitCommand: Command {
         let templarKind: Templar.Kind
         
         if kind.value {
-            let xcodeProj = try self.createXcodeTemplate()
+            let xcodeProj = try createXcodeTemplate()
             templarKind = .xcodeproj(xcodeProj)
         } else {
-            throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "In progress".red])
-//            let custom = Templar.Custom(templates: [])
-//            kind = .custom(custom)
+            let custom = Templar.Custom(templates: [])
+            templarKind = .custom(custom)
         }
         
         let templar = Templar(version: TemplarInfo.version, templateFolder: TemplarInfo.defaultFolder, kind: templarKind)
@@ -39,7 +38,7 @@ class InitCommand: Command {
         stdout <<< "Create config folder \(templar.templateFolder)".yellow
         try Folder.current.createSubfolderIfNeeded(withName: templar.templateFolder)
         
-        stdout <<< "Finished 🚀".green
+        stdout <<< "Finished 🚀".green.bold
     }
     
     // MARK: - Private
@@ -84,10 +83,6 @@ class InitCommand: Command {
                                           templates: [])
         
         return xcodeProj
-    }
-    
-    private func createCustomTemplate() throws -> Templar.Custom {
-        fatalError()
     }
     
 }
