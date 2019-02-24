@@ -1,0 +1,10 @@
+version: 1.0.0
+templateFolder: .templates
+kind:
+  xcodeproj:
+    name: CoreDataExample.xcodeproj
+    companyName: Templar
+    targets:
+    - CoreDataExample
+    templates: 
+    - kek

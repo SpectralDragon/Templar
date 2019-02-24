@@ -44,32 +44,36 @@ class GenerateTemplate: Command {
         let xcFile = try Folder.current.subfolder(named: xcodeproj.name)
         let project = try XcodeProj(pathString: xcFile.path)
         
-        try generateFiles(using: templar, selectedTemplate: selectedTemplate) { template, file, path in
+        try generateFiles(using: templar, selectedTemplate: selectedTemplate) { template, file, fullPath in
             let findedGroup = project.pbxproj.groups.first(where: {
                 if let path = $0.path, !path.isEmpty {
-                    return template.root.hasPrefix(path)
+                    return fullPath.string.hasPrefix(path)
                 } else {
                     return false
                 }
             })
             
             if let rootGroup = findedGroup {
-                let pathToAddedGroup = Path(String(path.string.dropFirst(rootGroup.path.orEmpty.count)))
+                
+                var stringPathToAddedGroup = String(fullPath.string.dropFirst(rootGroup.path.orEmpty.count))
+                
+                // Remove first slash, because xcodeproj will generate empty group
+                if stringPathToAddedGroup.first == "/" {
+                    stringPathToAddedGroup.removeFirst()
+                }
+                let pathToAddedGroup = Path(stringPathToAddedGroup)
                 
                 let createdGroups = try rootGroup.addGroup(named: pathToAddedGroup.parent().string)
-                
+
                 if createdGroups.isEmpty {
                     self.stderr <<< "Can't get groups by path \(Path(file.path).string) for root group \(rootGroup.path ?? "")".red
                     return
                 }
-                
+
                 if let lastGroupInChain = createdGroups.last {
-                    let file = PBXFileElement(sourceTree: .group, path: nil, name: path.lastComponent, includeInIndex: true)
-                    let buildFile = PBXBuildFile(file: file)
-                    project.pbxproj.add(object: buildFile)
-                    try lastGroupInChain.addFile(at: path, sourceTree: .group, sourceRoot: Path(xcFile.path).parent())
+                    try lastGroupInChain.addFile(at: fullPath, sourceRoot: Path(xcFile.path).parent())
                 } else {
-                    throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create file by path \(path.string)".red])
+                    throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create file by path \(fullPath.string)".red])
                 }
             } else {
                 self.stderr <<< "Can't found root group in xcodeproject by path \(template.root)".red
@@ -177,11 +181,21 @@ class GenerateTemplate: Command {
         
         stdout <<< "Did finish generate 🛠".green.bold
     }
+    
+    private func addGroups(to rootGroup: PBXGroup, path: String) throws {
+        
+    }
 }
 
 fileprivate extension Array where Element == Template.Modifier {
     var pattern: String {
         return self.reduce("", { "\($0)=\($1.rawValue)=|"})
+    }
+}
+
+extension PBXGroup: CustomStringConvertible {
+    public var description: String {
+        return self.name ?? self.path ?? "Noting"
     }
 }
 
