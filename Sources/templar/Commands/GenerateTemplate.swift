@@ -165,14 +165,20 @@ class GenerateTemplate: Command {
             stdout <<< "Begin executing scripts".yellow
             
             for script in scripts {
-                let arguments = script.split(separator: " ").map(String.init)
-//                let process = Process.launchedProcess(launchPath: "/usr/bin", arguments: arguments)
-//                
-//                if #available(macOS 10.13, *) {
-//                    try process.run()
-//                } else {
-//                    process.launch()
-//                }
+                let process = Process()
+                if #available(OSX 10.13, *) {
+                    process.executableURL = URL(fileURLWithPath: "/usr/bin")
+                } else {
+                    process.launchPath = "/usr/bin"
+                }
+                
+                process.arguments = [script]
+
+                if #available(macOS 10.13, *) {
+                    try process.run()
+                } else {
+                    process.launch()
+                }
                 
             }
             
