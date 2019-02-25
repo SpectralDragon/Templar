@@ -15,7 +15,7 @@ import Rainbow
 class TempalateCommand: CommandGroup {
     let name = "template"
     
-    var children: [Routable] = [NewTemplateCommand(), UpdateTemplateCommand()]
+    var children: [Routable] = [NewTemplateCommand()]//UpdateTemplateCommand()]
     
     let shortDescription: String = "Manage your templates files"
 }
@@ -27,6 +27,8 @@ class NewTemplateCommand: Command {
     let templateName = Parameter()
     
     let needsUseScripts = Flag("--use-scripts", description: "Add scripts parameter to template.", defaultValue: false)
+    
+    let needsUseCustomSettings = Flag("--custom-settings", description: "Add settings parameter to template.", defaultValue: false)
     
     private let decoder = YAMLDecoder()
     
@@ -42,11 +44,13 @@ class NewTemplateCommand: Command {
                                                              output: stderr)
         
         let scripts: [String]? = needsUseScripts.value ? [] : nil
+        let settings = needsUseCustomSettings.value ? Template.Settings(dateFormat: "dd/MM/YYYY", projectName: "") : nil
         
         let template = Template(
             version: "1.0.0",
             summary: "ENTER_YOUR_SUMMORY",
-            author: "ENTER_YOUR",
+            author: getUser() ?? "ENTER_YOUR",
+            settings: settings,
             root: rootModulePath,
             files: [Template.File(path: "View/ViewController.swift", templatePath: "View/ViewController.swift.templar")],
             replaceRules: [Template.Rule(pattern: "__NAME__", question: "Name of your module:")],
@@ -70,6 +74,23 @@ class NewTemplateCommand: Command {
         
         let newTemplar = try YAMLEncoder().encode(templar)
         try Folder.current.createFile(named: TemplarInfo.configFileName, contents: newTemplar)
+    }
+    
+    private func getUser() -> String? {
+        let process = Process()
+        
+        let launchPath = "/usr/bin/whoami"
+        
+        if #available(OSX 10.13, *) {
+            process.executableURL = URL(fileURLWithPath: launchPath)
+        } else {
+            process.launchPath = launchPath
+        }
+        do {
+            return try process.runWithResult()
+        } catch {
+            return nil
+        }
     }
 }
 

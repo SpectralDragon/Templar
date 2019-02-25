@@ -47,7 +47,6 @@ class GenerateTemplate: Command {
         let project = try XcodeProj(pathString: xcFile.path)
         
         
-        
         let targets = project.pbxproj.nativeTargets.filter { target -> Bool in
             return xcodeproj.targets.contains(target.name)
         }
@@ -206,13 +205,8 @@ class GenerateTemplate: Command {
                 }
                 
                 process.arguments = [script]
-
-                if #available(macOS 10.13, *) {
-                    try process.run()
-                } else {
-                    process.launch()
-                }
                 
+                try process.runWithResult()
             }
             
             stdout <<< "Did finish executing scripts".yellow

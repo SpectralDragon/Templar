@@ -31,3 +31,21 @@ extension Optional where Wrapped == String {
         return self ?? ""
     }
 }
+
+extension Process {
+    
+    @discardableResult
+    func runWithResult() throws -> String? {
+        let pipe = Pipe()
+        self.standardOutput = pipe
+        
+        if #available(macOS 10.13, *) {
+            try self.run()
+        } else {
+            self.launch()
+        }
+        
+        let outputData = pipe.fileHandleForReading.readDataToEndOfFile()
+        return String(data: outputData, encoding: .utf8)
+    }
+}
