@@ -26,7 +26,7 @@ class InitCommand: Command {
             let xcodeProj = try createXcodeTemplate()
             templarKind = .xcodeproj(xcodeProj)
         } else {
-            let custom = Templar.Custom(templates: [])
+            let custom = try createCustomTemplate()
             templarKind = .custom(custom)
         }
         
@@ -83,6 +83,12 @@ class InitCommand: Command {
                                           templates: [])
         
         return xcodeProj
+    }
+    
+    private func createCustomTemplate() throws -> Templar.Custom {
+        let companyName = Input.readLine(prompt: "What is your company name?".green)
+        
+        return Templar.Custom(companyName: companyName, templates: [])
     }
     
 }

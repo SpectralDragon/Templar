@@ -17,6 +17,7 @@ struct Templar: Codable {
     }
     
     struct Custom: Codable {
+        let companyName: String?
         var templates: Set<String>
     }
     

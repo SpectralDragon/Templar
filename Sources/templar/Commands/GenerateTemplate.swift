@@ -178,6 +178,12 @@ class GenerateTemplate: Command {
             let finishFileName = Path(moduleName.value.appending(filePath.lastComponent))
             filePath = Path(String(filePath.string.dropLast(filePath.lastComponent.count))) + finishFileName
             
+            for key in CommonKey.allCases {
+                if let value = key.valueToReplace(using: templar, template: template, fullPath: filePath) {
+                    rawTemplate = rawTemplate.replacingOccurrences(of: key.rawValue, with: value)
+                }
+            }
+            
             let rootPath = Path(template.root) + Path(moduleName.value)
             let path = rootPath + filePath
             let fullPath = Path(Folder.current.path) + path
@@ -214,9 +220,45 @@ class GenerateTemplate: Command {
         
         stdout <<< "Did finish generate 🛠".green.bold
     }
+}
+
+fileprivate enum CommonKey: String, CaseIterable {
+    case year = "__YEAR__"
+    case author = "__AUTHOR__"
+    case date = "__DATE__"
+    case companyName = "__COMPANY_NAME__"
+    case file = "__FILE__"
+    case project = "__PROJECT__"
     
-    private func addFile(to group: PBXGroup, path: String) throws {
-        
+    func valueToReplace(using templar: Templar, template: Template, fullPath: Path) -> String? {
+        switch self {
+        case .author:
+            return template.author
+        case .date:
+            let formatter = DateFormatter()
+            formatter.dateFormat = template.settings?.dateFormat ?? "dd/MM/YYYY"
+            return formatter.string(from: Date())
+        case .companyName:
+            switch templar.kind {
+            case .xcodeproj(let xcodeproj):
+                return xcodeproj.companyName
+            case .custom(let custom):
+                return custom.companyName
+            }
+        case .file:
+            return fullPath.lastComponent
+        case .project:
+            switch templar.kind {
+            case .xcodeproj(let xcodeproj):
+                return template.settings?.projectName ?? Path(xcodeproj.name).lastComponentWithoutExtension
+            case .custom:
+                return nil
+            }
+        case .year:
+            let formatter = DateFormatter()
+            formatter.dateFormat = "YYYY"
+            return formatter.string(from: Date())
+        }
     }
 }
 

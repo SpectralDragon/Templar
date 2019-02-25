@@ -14,6 +14,8 @@ struct Template: Codable {
     let summary: String?
     let author: String?
     
+    let settings: Settings?
+    
     let root: String
     let files: [File]
     
@@ -24,6 +26,12 @@ struct Template: Codable {
 }
 
 extension Template {
+    
+    struct Settings: Codable {
+        let dateFormat: String?
+        let projectName: String?
+    }
+    
     enum Modifier: String, CaseIterable {
         case lowercase
         case firstLowercased
