@@ -2,18 +2,27 @@
 
 ### How it work?
 
-For begining you are should install Templar in your project.
+For beginning you are must install Templar in your project.
 
 ```bash
 templar init
 ```
-Templar create YAML config `.templar` and `.templates` directory.
+
+or if your project using xcode:
+
+```bash
+templar init --xcodeproj
+```
+
+Templar will create YAML config `.templar` and `.templates` directory.
+
+Let's talk about each a new generated file:
 
 ##### 1) `.templar`
 
 `.templar` contains information about your project and path for templates directory. 
 
-Example:
+For example we will talk about project using xcode:
 
 ```yaml
 kind: # Information about your project
@@ -29,10 +38,10 @@ templateFolder: .templates # path to templates directory
 
 ##### 2) Templates
 
-After install your templar, you are can use command `templar template new [templateName]` for generation a template directory with blank. 
+After install your templar, you can use command `templar template new [templateName]` for generation a template directory with blank. 
 **Each template going to contains in personal folder.**
 
-The template directory contains `[templateName].templar` and looks like this:
+The template directory will contains `[templateName].templar` and looks like this:
 
 ```yaml
 version: 1.0.0 # template version. 
@@ -57,17 +66,17 @@ class __NAME__ViewController: UIViewController {
 }
 ```
 
-After generating your pattern will replacing on user answer.
+Templar will replacing each pattern using user answer from question.
 
 Next chapter: 
 
 Pattern can be modified with next separated keys:
 
-* lowercase
-* firstLowercased
-* uppercase
-* firstUppercased
-* snake_case
+* =lowercase=
+* =firstLowercased=
+* =uppercase=
+* =firstUppercased=
+* =snake_case=
 
 **Notifce: All modifier can be use for each pattern once. Also modifier case sensative!**
 
@@ -83,13 +92,21 @@ func __NAME__=firstLowercased=ViewControllerDidLoad() {
 }
 ```
 
+### How to use?
+
+```bash
+templar generate [templateName]
+```
+
+Templar will ask user using question from template file and will replace each pattern on answer. Pretty simple, right?
+
 ### Scripts?
 
-Yup, Templar is supported scripts. Scripts will run after template generation and will execute in bash.
+Yup, Templar supported scripts. Scripts will run when template did finish successfully and will execute using bash.
 
 For creating scripts just use command: `templar template new [templateName] --use-scripts` or set manual `scripts:` parameter to your template.
 
-Like example generate the new xcodeproj for your SPM project:
+Like example generate a new xcodeproj for your SPM project:
 
 ```yaml
 ...
@@ -97,20 +114,36 @@ scripts:
   - swift package generate-xcodeproj
 ```
 
-### Installation
+### Installing
 
-🍺 Homebrew
+Using Makefile 
 
 ```bash
-brew cask install templar
+$ git clone https://github.com/SpectralDragon/Templar.git
+$ cd Templar
+$ make
 ```
 
-🛠 Manual
-
-Clone this project to your mac and execute next command:
+Using [Homebrew 🍺](https://github.com/Homebrew)
 
 ```bash
-sudo sh install_templar.sh
+brew install templar
+```
+
+Using [Mint 🌱](https://github.com/yonaskolb/mint)
+
+```bash
+mint install SpectralDragon/Templar
+```
+
+Using the [Swift Package Manager 🛠](https://github.com/apple/swift-package-manager) 
+
+```bash
+$ git clone https://github.com/SpectralDragon/Templar.git
+$ cd Templar
+$ swift build -c release -Xswiftc -static-stdlib
+$ cd .build/release
+$ cp -f templar /usr/local/bin/templar
 ```
 
 ## Author

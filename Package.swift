@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "templar",
+    products: [
+        .executable(name: "templar", targets: ["templar"]),
+    ],
     dependencies: [
         .package(url: "https://github.com/tuist/xcodeproj.git", .upToNextMajor(from: "6.5.0")),
         .package(url: "https://github.com/jpsim/Yams.git", .upToNextMajor(from: "1.0.1")),
