@@ -95,7 +95,7 @@ func __NAME__=firstLowercased=ViewControllerDidLoad() {
 ### How to use?
 
 ```bash
-templar generate [templateName]
+templar generate [templateName] [moduleName]
 ```
 
 Templar will ask user using question from template file and will replace each pattern on answer. Pretty simple, right?
