@@ -18,6 +18,8 @@ class GenerateTemplate: Command {
     
     let templateName = Parameter()
     
+    let moduleName = Parameter()
+    
     private var decoder = YAMLDecoder()
     
     func execute() throws {
@@ -171,7 +173,11 @@ class GenerateTemplate: Command {
                 }
             }
             
-            let filePath = Path(file.path)
+            // We must insert moduleName before
+            var filePath = Path(file.path)
+            let finishFileName = Path(moduleName.value.appending(filePath.lastComponent))
+            filePath = Path(String(filePath.string.dropLast(filePath.lastComponent.count))) + finishFileName
+            
             let rootPath = Path(template.root)
             let path = rootPath + filePath
             let fullPath = Path(Folder.current.path) + path
