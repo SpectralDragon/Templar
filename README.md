@@ -99,10 +99,18 @@ scripts:
 
 ### Installation
 
- Homebrew
+🍺 Homebrew
 
 ```bash
 brew cask install templar
+```
+
+🛠 Manual
+
+Clone this project to your mac and execute next command:
+
+```bash
+sudo sh install_templar.sh
 ```
 
 ## Author
