@@ -178,7 +178,7 @@ class GenerateTemplate: Command {
             let finishFileName = Path(moduleName.value.appending(filePath.lastComponent))
             filePath = Path(String(filePath.string.dropLast(filePath.lastComponent.count))) + finishFileName
             
-            let rootPath = Path(template.root)
+            let rootPath = Path(template.root) + Path(moduleName.value)
             let path = rootPath + filePath
             let fullPath = Path(Folder.current.path) + path
             
