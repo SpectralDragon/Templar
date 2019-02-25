@@ -70,7 +70,7 @@ class GenerateTemplate: Command {
                 }
                 let pathToAddedGroup = Path(stringPathToAddedGroup)
                 
-                let createdGroups = try rootGroup.addGroup(named: pathToAddedGroup.parent().string)
+                let createdGroups = try rootGroup.addGroupOrUseExists(named: pathToAddedGroup.parent().string)
 
                 if createdGroups.isEmpty {
                     self.stderr <<< "Can't get groups by path \(Path(file.path).string) for root group \(rootGroup.path ?? "")".red
@@ -83,13 +83,22 @@ class GenerateTemplate: Command {
                                      lastKnownFileType: fullPath.extension.flatMap(Xcode.filetype),
                                      path: fullPath.lastComponent)
                     
+                    if let index = lastGroupInChain.children.index(where: { $0.name == fileReference.name }) {
+                        let oldFileRef = lastGroupInChain.children[index]
+                        lastGroupInChain.children[index] = fileReference
+                        project.pbxproj.delete(object: oldFileRef)
+                        
+                    } else {
+                        lastGroupInChain.children.append(fileReference)
+                    }
+                    
                     project.pbxproj.add(object: fileReference)
-                    lastGroupInChain.children.append(fileReference)
                     
                     for target in targets {
                         let buildPhase = try target.sourcesBuildPhase()
-                        _ = try buildPhase?.add(file: fileReference) // I don't know why this method isn't @discardableResult
+                        try buildPhase?.updateOrAdd(file: fileReference) // I don't know why this method isn't @discardableResult
                     }
+
                 } else {
                     throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create file by path \(fullPath.string)".red])
                 }
@@ -130,12 +139,10 @@ class GenerateTemplate: Command {
             throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Path to root in template \(templateName.value) is empty".red])
         }
         
-        let itemsToReplace = template.replaceRules.map { rule -> (answer: String, pattern: String) in
+        let itemsToReplace = template.replaceRules?.compactMap { rule -> (answer: String, pattern: String) in
             let answer = Input.readLineWhileNotGetAnswer(prompt: rule.question, error: "Answer can't be empty", output: stderr)
             return (answer, rule.pattern)
         }
-        
-        let allModifiers = Template.Modifier.allCases
         
         for file in template.files {
             let templateFile = try templateFolder.file(atPath: file.templatePath)
@@ -145,31 +152,8 @@ class GenerateTemplate: Command {
             }
             var rawTemplate = try templateFile.readAsString()
             
-            for item in itemsToReplace {
-                // Regex pattern looks like YOURPATTERN(=lowercased=|=snake_case=|)
-                let expression = try NSRegularExpression(pattern: "\(item.pattern)(\(allModifiers.pattern))", options: .caseInsensitive)
-                
-                while let range = expression.firstMatch(in: rawTemplate, options: [], range: NSRange(0..<rawTemplate.count)).flatMap( { Range($0.range, in: rawTemplate) }) {
-                    let currentMatchString = String(rawTemplate[range])
-                    var textToReplace = item.answer
-                    
-                    if let modifier = allModifiers.first(where: { currentMatchString.hasSuffix($0.rawValue) }) {
-                        switch modifier {
-                        case .lowercase:
-                            textToReplace = textToReplace.lowercased()
-                        case .firstLowercased:
-                            textToReplace = textToReplace.firstLowercased()
-                        case .uppercase:
-                            textToReplace = textToReplace.uppercased()
-                        case .firstUppercased:
-                            textToReplace = textToReplace.firstUppercased()
-                        case .snake_case:
-                            textToReplace = textToReplace.snakecased()
-                        }
-                    }
-                    
-                    rawTemplate.replaceSubrange(range, with: textToReplace)
-                }
+            for item in itemsToReplace ?? [] {
+                try rawTemplate.replaceOccurrencesUsingModifiers(pattern: item.pattern, with: item.answer)
             }
             
             // We must insert moduleName before
@@ -178,8 +162,8 @@ class GenerateTemplate: Command {
             filePath = Path(String(filePath.string.dropLast(filePath.lastComponent.count))) + finishFileName
             
             for key in CommonKey.allCases {
-                if let value = key.valueToReplace(using: templar, template: template, fullPath: filePath) {
-                    rawTemplate = rawTemplate.replacingOccurrences(of: key.rawValue, with: value)
+                if let value = key.valueToReplace(using: templar, template: template, fullPath: filePath, moduleName: moduleName.value) {
+                    try rawTemplate.replaceOccurrencesUsingModifiers(pattern: key.rawValue, with: value)
                 }
             }
             
@@ -216,6 +200,75 @@ class GenerateTemplate: Command {
     }
 }
 
+fileprivate extension PBXGroup {
+    func addGroupOrUseExists(named: String) throws -> [PBXGroup] {
+        var pathComponents = Path(named).components
+        var lastGroup = self
+        
+        for component in pathComponents {
+            if let findedGroup = lastGroup.children.first(where: { $0.path == component }) as? PBXGroup {
+                lastGroup = findedGroup
+                pathComponents.removeFirst()
+            } else {
+                break
+            }
+        }
+        
+        if pathComponents.isEmpty {
+            return [lastGroup]
+        } else {
+            let groupPath = Path(pathComponents.joined(separator: "/"))
+            return try lastGroup.addGroup(named: groupPath.string)
+        }
+    }
+}
+
+fileprivate extension PBXSourcesBuildPhase {
+    
+    @discardableResult
+    func updateOrAdd(file: PBXFileReference) throws -> PBXBuildFile {
+        if let index = self.files.firstIndex(where: { $0.file?.path == file.path && $0.file?.name == file.name }) {
+            self.files.remove(at: index)
+        }
+        
+        return try self.add(file: file)
+    }
+}
+
+
+fileprivate extension String {
+    
+    /// Regex pattern looks like YOURPATTERN(=lowercased=|=snake_case=|)
+    mutating func replaceOccurrencesUsingModifiers(pattern: String, with value: String) throws  {
+        
+        let allModifiers = Template.Modifier.allCases
+        
+        let expression = try NSRegularExpression(pattern: "\(pattern)(\(allModifiers.pattern))", options: .caseInsensitive)
+        
+        while let range = expression.firstMatch(in: self, options: [], range: NSRange(0..<self.count)).flatMap( { Range($0.range, in: self) }) {
+            let currentMatchString = String(self[range])
+            var textToReplace = value
+            
+            if let modifier = allModifiers.first(where: { currentMatchString.hasSuffix($0.rawValue) }) {
+                switch modifier {
+                case .lowercase:
+                    textToReplace = textToReplace.lowercased()
+                case .firstLowercased:
+                    textToReplace = textToReplace.firstLowercased()
+                case .uppercase:
+                    textToReplace = textToReplace.uppercased()
+                case .firstUppercased:
+                    textToReplace = textToReplace.firstUppercased()
+                case .snake_case:
+                    textToReplace = textToReplace.snakecased()
+                }
+            }
+            
+            self.replaceSubrange(range, with: textToReplace)
+        }
+    }
+}
+
 fileprivate enum CommonKey: String, CaseIterable {
     case year = "__YEAR__"
     case author = "__AUTHOR__"
@@ -223,8 +276,9 @@ fileprivate enum CommonKey: String, CaseIterable {
     case companyName = "__COMPANY_NAME__"
     case file = "__FILE__"
     case project = "__PROJECT__"
+    case name = "__NAME__"
     
-    func valueToReplace(using templar: Templar, template: Template, fullPath: Path) -> String? {
+    func valueToReplace(using templar: Templar, template: Template, fullPath: Path, moduleName: String) -> String? {
         switch self {
         case .author:
             return template.author
@@ -252,6 +306,8 @@ fileprivate enum CommonKey: String, CaseIterable {
             let formatter = DateFormatter()
             formatter.dateFormat = "YYYY"
             return formatter.string(from: Date())
+        case .name:
+            return moduleName
         }
     }
 }

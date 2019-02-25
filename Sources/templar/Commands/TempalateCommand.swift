@@ -44,7 +44,7 @@ class NewTemplateCommand: Command {
                                                              output: stderr)
         
         let scripts: [String]? = needsUseScripts.value ? [] : nil
-        let settings = needsUseCustomSettings.value ? Template.Settings(dateFormat: "dd/MM/YYYY", projectName: "") : nil
+        let settings = needsUseCustomSettings.value ? Template.Settings(dateFormat: "dd/MM/YYYY", projectName: "", licensePath: "") : nil
         
         let template = Template(
             version: "1.0.0",
@@ -53,7 +53,7 @@ class NewTemplateCommand: Command {
             settings: settings,
             root: rootModulePath,
             files: [Template.File(path: "View/ViewController.swift", templatePath: "View/ViewController.swift.templar")],
-            replaceRules: [Template.Rule(pattern: "__NAME__", question: "Name of your module:")],
+            replaceRules: [Template.Rule(pattern: "__pattern__", question: "YOUR QUESTION")],
             scripts: scripts
         )
         

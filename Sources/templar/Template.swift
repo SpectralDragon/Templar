@@ -19,7 +19,7 @@ struct Template: Codable {
     let root: String
     let files: [File]
     
-    let replaceRules: [Rule]
+    let replaceRules: [Rule]?
     
     let scripts: [String]?
     
@@ -30,6 +30,7 @@ extension Template {
     struct Settings: Codable {
         let dateFormat: String?
         let projectName: String?
+        let licensePath: String?
     }
     
     enum Modifier: String, CaseIterable {
