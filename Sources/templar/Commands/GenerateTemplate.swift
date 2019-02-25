@@ -44,6 +44,12 @@ class GenerateTemplate: Command {
         let xcFile = try Folder.current.subfolder(named: xcodeproj.name)
         let project = try XcodeProj(pathString: xcFile.path)
         
+        
+        
+        let targets = project.pbxproj.nativeTargets.filter { target -> Bool in
+            return xcodeproj.targets.contains(target.name)
+        }
+        
         try generateFiles(using: templar, selectedTemplate: selectedTemplate) { template, file, fullPath in
             let findedGroup = project.pbxproj.groups.first(where: {
                 if let path = $0.path, !path.isEmpty {
@@ -71,7 +77,18 @@ class GenerateTemplate: Command {
                 }
 
                 if let lastGroupInChain = createdGroups.last {
-                    try lastGroupInChain.addFile(at: fullPath, sourceRoot: Path(xcFile.path).parent())
+                    let fileReference = PBXFileReference(sourceTree: .group, name: fullPath.lastComponent,
+                                     explicitFileType: fullPath.extension.flatMap(Xcode.filetype),
+                                     lastKnownFileType: fullPath.extension.flatMap(Xcode.filetype),
+                                     path: fullPath.lastComponent)
+                    
+                    project.pbxproj.add(object: fileReference)
+                    lastGroupInChain.children.append(fileReference)
+                    
+                    for target in targets {
+                        let buildPhase = try target.sourcesBuildPhase()
+                        _ = try buildPhase?.add(file: fileReference) // I don't know why this method isn't @discardableResult
+                    }
                 } else {
                     throw NSError(domain: "templar", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create file by path \(fullPath.string)".red])
                 }
@@ -91,11 +108,15 @@ class GenerateTemplate: Command {
         }
         
         try generateFiles(using: templar, selectedTemplate: selectedTemplate) { _, _, _ in
-            
+            /// Custom template not need
         }
         
     }
     
+    /// Generate file and return file path to generated file
+    /// - parameter templar: Templar config.
+    /// - parameter selectedTemplate: Selected template name use for generating.
+    /// - parameter onGenerateFileFinishHandler: Return selected template, template file and full path to generated file. Call after template file was generate succefly.
     private func generateFiles(using templar: Templar,
                                selectedTemplate: String,
                                onGenerateFileFinishHandler: @escaping (_ template: Template, _ file: Template.File, _ path: Path) throws -> Void) throws {
@@ -188,7 +209,7 @@ class GenerateTemplate: Command {
         stdout <<< "Did finish generate 🛠".green.bold
     }
     
-    private func addGroups(to rootGroup: PBXGroup, path: String) throws {
+    private func addFile(to group: PBXGroup, path: String) throws {
         
     }
 }
@@ -199,11 +220,13 @@ fileprivate extension Array where Element == Template.Modifier {
     }
 }
 
+#if DEBUG
 extension PBXGroup: CustomStringConvertible {
     public var description: String {
         return self.name ?? self.path ?? "Noting"
     }
 }
+#endif
 
 fileprivate extension String {
     
