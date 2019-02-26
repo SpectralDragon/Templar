@@ -25,6 +25,8 @@ Let's talk about each a new generated file:
 For example we will talk about project using xcode:
 
 ```yaml
+version: 1.0.0 # config version 
+templateFolder: .templates # path to templates directory
 kind: # Information about your project
   xcodeproj:
     name: templar.xcodeproj # your project file name
@@ -32,8 +34,6 @@ kind: # Information about your project
       - templar
      templates: # list of templates name
       - mvvm
-version: 1.0.0 # config version 
-templateFolder: .templates # path to templates directory
 ```
 
 ##### 2) Templates
@@ -48,7 +48,7 @@ version: 1.0.0 # template version.
 summary: ENTER_YOUR_SUMMORY # Bit of information about your template and what it do.
 author: ENTER_YOUR # Authour name or links
 root: Sources/templar # Path to folder where templar will generate your templates.
-files: # Tempalte files
+files: # Template files
   - path: View/ViewController.swift # Path for place where file will contains after process
     templatePath: View/ViewController.swift.templar # Path to template
 replaceRules: # Keys for replacing
@@ -163,7 +163,7 @@ $ make
 Using [Mint 🌱](https://github.com/yonaskolb/mint)
 
 ```bash
-mint install SpectralDragon/Templar
+$ mint install SpectralDragon/Templar
 ```
 
 Using the [Swift Package Manager 🛠](https://github.com/apple/swift-package-manager) 
