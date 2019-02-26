@@ -56,15 +56,34 @@ replaceRules: # Keys for replacing
      question: 'Name of your class:' # Question will display in terminal and answer will use for replace pattern
 ```
 
+### How to use?
+
+```bash
+templar generate [templateName] [moduleName]
+```
+
+Templar will asks the user questions from your template config file and will replace each pattern on answer. Pretty simple, right?
+
 ### How to write template?
 
-The first you going to set pattern for replace. Like example it will `__NAME__`
+The first you going to create template file and set patterns for replace. Like example it will `__CLASS_NAME__`
 
 ```swift
 class __CLASS_NAME__ViewController: UIViewController {
   // Other code
 }
 ```
+
+After that you should add path to your template file and path to finish directory in your template config.
+
+```yaml
+varsion: 1.0.0
+files:
+ - path: View/ViewController.swift
+   templatePath: View/ViewController.swift.templar
+```
+
+Okay, that it. When you will generate template, Templar will create the file using `[moduleName]` like name of your files. Like example `View/MyPrettyViewController.swift`.
 
 Templar will replacing each pattern using user answer from question.
 
@@ -116,14 +135,6 @@ settings:
   projectName: Templar
   licensePath: LICENSE #will add in future release
 ```
-
-### How to use?
-
-```bash
-templar generate [templateName] [moduleName]
-```
-
-Templar will ask user using question from template file and will replace each pattern on answer. Pretty simple, right?
 
 ### Scripts?
 
