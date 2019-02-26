@@ -96,14 +96,14 @@ func __CLASS_NAME__=firstLowercased=ViewControllerDidLoad() {
 
 Templar there is default patterns for replacing. 
 
-* __NAME__ - module name taken from argument [moduleName]
-* __FILE__ - file name
-* __PROJECT__ - project name taken from templar `config -> xcodeproj -> name` or nil. Can be modified with template settings `template -> settings -> projectName`
-* __AUTHOR__ - author name, taken from `template -> author`. If author name not exists in template, this key will not replace.
-* __YEAR__ - current year.
-* __DATE__ - current date with format dd/MM/YYYY. Can be modified with template settings `template -> settings -> dateFormat`
-* __COMPANY_NAME__ - your company name taken from `templar -> companyName` or nil.
-* **(FUTURE)** __LICENSE__ - will replace key on license file in project root directory. Path can be modified with template settings `template -> settings -> licensePath`. OR take license template and replace each key using default patterns. 
+* `__NAME__` - module name taken from argument [moduleName]
+* `__FILE__` - file name
+* `__PROJECT__` - project name taken from templar `config -> xcodeproj -> name` or nil. Can be modified with template settings `template -> settings -> projectName`
+* `__AUTHOR__` - author name, taken from `template -> author`. If author name not exists in template, this key will not replace.
+* `__YEAR__` - current year.
+* `__DATE__` - current date with format dd/MM/YYYY. Can be modified with template settings `template -> settings -> dateFormat`
+* `__COMPANY_NAME__` - your company name taken from `templar -> companyName` or nil.
+* **(FUTURE)** `__LICENSE__` - will replace key on license file in project root directory. Path can be modified with template settings `template -> settings -> licensePath`. OR take license template and replace each key using default patterns. 
 
 ### Template settings
 
