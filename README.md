@@ -92,6 +92,30 @@ func __NAME__=firstLowercased=ViewControllerDidLoad() {
 }
 ```
 
+### Default patterns
+
+Templar there is default patterns for replacing. 
+
+* __FILE__ - file name
+* __PROJECT__ - project name taken from templar `config -> xcodeproj -> name` or nil. Can be modified with template settings `template -> settings -> projectName`
+* __AUTHOR__ - author name, taken from `template -> author`. If author name not exists in template, this key will not replace.
+* __YEAR__ - current year.
+* __DATE__ - current date with format dd/MM/YYYY. Can be modified with template settings `template -> settings -> dateFormat`
+* __COMPANY_NAME__ - your company name taken from `templar -> companyName` or nil.
+* **(FUTURE)** __LICENSE__ - will replace key on license file in project root directory. Path can be modified with template settings `template -> settings -> licensePath`. OR take license template and replace each key using default patterns. 
+
+### Template settings
+
+Settings will contains specification for replacing or some action will add in future.
+
+```yaml
+version: 1.0.0
+settings:
+  dateFormat: dd/MM/YY
+  projectName: Templar
+  licensePath: LICENSE #will add in future release
+```
+
 ### How to use?
 
 ```bash
@@ -122,12 +146,6 @@ Using Makefile
 $ git clone https://github.com/SpectralDragon/Templar.git
 $ cd Templar
 $ make
-```
-
-Using [Homebrew 🍺](https://github.com/Homebrew)
-
-```bash
-brew install templar
 ```
 
 Using [Mint 🌱](https://github.com/yonaskolb/mint)
