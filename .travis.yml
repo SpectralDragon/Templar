@@ -1,0 +1,10 @@
+os: linux
+language: generic
+sudo: required
+dist: trusty
+env:
+    - SWIFT_VERSION=4.1
+install:
+    - make
+script:
+    - swift test
