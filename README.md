@@ -85,7 +85,7 @@ files:
 
 Okay, that it. When you will generate template, Templar will create the file using `[moduleName]` like name of your files. Like example `View/MyPrettyViewController.swift`.
 
-Templar will replacing each pattern using user answer from question.
+Templar will replacing each pattern using user answers from questions.
 
 Next chapter: 
 
