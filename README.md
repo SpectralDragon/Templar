@@ -5,13 +5,13 @@
 For beginning you are must install Templar in your project.
 
 ```bash
-templar init
+$ templar init
 ```
 
 or if your project using xcode:
 
 ```bash
-templar init --xcodeproj
+$ templar init --xcodeproj
 ```
 
 Templar will create YAML config `.templar` and `.templates` directory.
@@ -25,6 +25,8 @@ Let's talk about each a new generated file:
 For example we will talk about project using xcode:
 
 ```yaml
+# Templar file
+
 version: 1.0.0 # config version 
 templateFolder: .templates # path to templates directory
 kind: # Information about your project
@@ -44,6 +46,8 @@ After install your templar, you can use command `templar template new [templateN
 The template directory will contains `[templateName].templar` and looks like this:
 
 ```yaml
+# Template file
+
 version: 1.0.0 # template version. 
 summary: ENTER_YOUR_SUMMORY # Bit of information about your template and what it do.
 author: ENTER_YOUR # Authour name or links
@@ -59,7 +63,7 @@ replaceRules: # Keys for replacing
 ## How to use?
 
 ```bash
-templar generate [templateName] [moduleName]
+$ templar generate [templateName] [moduleName]
 ```
 
 Templar will asks the user questions from your template config file and will replace each pattern on answer. Pretty simple, right?
@@ -77,7 +81,10 @@ class __CLASS_NAME__ViewController: UIViewController {
 After that you should add path to your template file and path to finish directory in your template config.
 
 ```yaml
+# Template file
+
 varsion: 1.0.0
+...
 files:
  - path: View/ViewController.swift
    templatePath: View/ViewController.swift.templar
@@ -129,11 +136,15 @@ Templar there is default patterns for replacing.
 Settings will contains specification for replacing or some action will add in future.
 
 ```yaml
+# Template file
+
 version: 1.0.0
+...
 settings:
   dateFormat: dd/MM/YY
   projectName: Templar
   licensePath: LICENSE #will add in future release
+...
 ```
 
 ### Scripts?
@@ -145,6 +156,8 @@ For creating scripts just use command: `templar template new [templateName] --us
 Like example generate a new xcodeproj for your SPM project:
 
 ```yaml
+# Template file
+
 ...
 scripts:
   - swift package generate-xcodeproj
