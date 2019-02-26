@@ -56,7 +56,7 @@ replaceRules: # Keys for replacing
      question: 'Name of your class:' # Question will display in terminal and answer will use for replace pattern
 ```
 
-### How to use?
+## How to use?
 
 ```bash
 templar generate [templateName] [moduleName]
@@ -64,7 +64,7 @@ templar generate [templateName] [moduleName]
 
 Templar will asks the user questions from your template config file and will replace each pattern on answer. Pretty simple, right?
 
-### How to write template?
+## How to write template?
 
 The first you going to create template file and set patterns for replace. Like example it will `__CLASS_NAME__`
 
@@ -150,7 +150,7 @@ scripts:
   - swift package generate-xcodeproj
 ```
 
-### Installing
+## Installing
 
 Using Makefile 
 
