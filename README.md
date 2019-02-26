@@ -1,5 +1,7 @@
 # Templar - a new way for template generating
 
+[![Build Status](https://travis-ci.org/SpectralDragon/Templar.svg?branch=master)](https://travis-ci.org/SpectralDragon/Templar.svg?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](https://opensource.org/licenses/MIT) [![Swift Version](https://img.shields.io/badge/swift-4.1-green.svg)](https://img.shields.io/badge/swift-4.1-green.svg)
+
 ### How it work?
 
 For beginning you are must install Templar in your project.
