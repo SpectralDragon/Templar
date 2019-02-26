@@ -52,8 +52,8 @@ files: # Tempalte files
   - path: View/ViewController.swift # Path for place where file will contains after process
     templatePath: View/ViewController.swift.templar # Path to template
 replaceRules: # Keys for replacing
-   - pattern: __NAME__ # Key for replace. You can use regexp here.
-     question: 'Name of your module:' # Question will display in terminal and answer will use for replace pattern
+   - pattern: __CLASS_NAME__ # Key for replace. You can use regexp here.
+     question: 'Name of your class:' # Question will display in terminal and answer will use for replace pattern
 ```
 
 ### How to write template?
@@ -61,7 +61,7 @@ replaceRules: # Keys for replacing
 The first you going to set pattern for replace. Like example it will `__NAME__`
 
 ```swift
-class __NAME__ViewController: UIViewController {
+class __CLASS_NAME__ViewController: UIViewController {
   // Other code
 }
 ```
@@ -83,9 +83,9 @@ Pattern can be modified with next separated keys:
 Example with modifiers:
 
 ```swift
-class __NAME__Presenter {
+class __CLASS_NAME__Presenter {
 
-func __NAME__=firstLowercased=ViewControllerDidLoad() {
+func __CLASS_NAME__=firstLowercased=ViewControllerDidLoad() {
      // Code
 }
 
@@ -96,6 +96,7 @@ func __NAME__=firstLowercased=ViewControllerDidLoad() {
 
 Templar there is default patterns for replacing. 
 
+* __NAME__ - module name taken from argument [moduleName]
 * __FILE__ - file name
 * __PROJECT__ - project name taken from templar `config -> xcodeproj -> name` or nil. Can be modified with template settings `template -> settings -> projectName`
 * __AUTHOR__ - author name, taken from `template -> author`. If author name not exists in template, this key will not replace.
