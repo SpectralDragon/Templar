@@ -104,10 +104,10 @@ Example with modifiers:
 ```swift
 class __CLASS_NAME__Presenter {
 
-func __CLASS_NAME__=firstLowercased=ViewControllerDidLoad() {
+   func __CLASS_NAME__=firstLowercased=ViewControllerDidLoad() {
      // Code
-}
-
+   }
+   
 }
 ```
 
