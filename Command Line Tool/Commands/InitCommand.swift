@@ -12,6 +12,7 @@ import Files
 import xcodeproj
 import Rainbow
 
+// TODO 2019-03-06/Slava Kornienko Вынести нахуй логику в ядро тулзы
 class InitCommand: Command {
     
     let name = "init"

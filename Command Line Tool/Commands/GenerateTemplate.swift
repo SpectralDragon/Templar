@@ -12,6 +12,8 @@ import Files
 import xcodeproj
 import PathKit
 
+
+// TODO 2019-03-06/Slava Kornienko Вынести нахуй логику генерации в ядро тулзы
 class GenerateTemplate: Command {
 
     let name = "generate"
