@@ -20,6 +20,8 @@ class TempalateCommand: CommandGroup {
     let shortDescription: String = "Manage your templates files"
 }
 
+
+// TODO 2019-03-06/Slava Kornienko Вынести нахуй логику генерации в ядро тулзы
 class NewTemplateCommand: Command {
     
     let name = "new"

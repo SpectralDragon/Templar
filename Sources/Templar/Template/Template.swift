@@ -57,3 +57,9 @@ extension Template {
         return "\(name).\(TemplarInfo.templateFileExtension)"
     }
 }
+
+extension Array where Element == Template.Modifier {
+    var pattern: String {
+        return self.reduce("", { "\($0)=\($1.rawValue)=|"})
+    }
+}
